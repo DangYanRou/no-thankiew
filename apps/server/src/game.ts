@@ -3,7 +3,7 @@ import type { GameState, Player, Difficulty, GameMode, CardGroup, PlayerResult }
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const CHIPS_BY_COUNT: Record<number, number> = {
-  3: 11, 4: 11, 5: 11, 6: 9, 7: 7,
+  3: 9, 4: 9, 5: 9, 6: 7, 7: 5,
 };
 
 export const DECISION_TIMER_MS: Record<Difficulty, number | null> = {

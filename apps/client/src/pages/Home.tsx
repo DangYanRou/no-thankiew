@@ -171,7 +171,7 @@ export default function Home() {
             <button
               type="submit"
               disabled={!joinCode.trim() || !name.trim()}
-              className="w-full py-5 rounded-2xl bg-green-dark/50 text-cream font-semibold hover:bg-green-dark active:scale-95 transition-all mt-1 h-10 disabled:cursor-not-allowed"
+              className="w-full py-5 rounded-2xl bg-green-dark text-cream font-semibold hover:bg-green-dark active:scale-95 transition-all mt-1 h-10 disabled:cursor-not-allowed disabled:bg-green-dark/50"
             >
               {t('home.joinRoom')}
             </button>

@@ -136,24 +136,28 @@ function Lobby({ roomCode }: { roomCode: string }) {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-svh flex items-center justify-center p-8">
-      <div className="w-full max-w-4xl flex gap-8">
+    <div style={{ padding: '10px' }}
+      className="min-h-svh flex flex-col p-6 gap-6 sm:items-center sm:justify-center">
+      <div className="w-full max-w-4xl flex flex-col gap-6 sm:flex-row sm:gap-8">
 
-        {/* Left — Room code + self */}
-        <div className="flex flex-col items-center justify-center gap-6 bg-green-dark/5 rounded-3xl p-10 w-72 shrink-0">
-          <p className="text-xs font-semibold text-green-dark/60 uppercase tracking-widest">{t('lobby.roomCode')}</p>
-          <p className="text-4xl font-bold text-green-dark tracking-[0.2em] font-mono">{roomCode}</p>
+        {/* Top (mobile) / Left (desktop) — Room code + self */}
+        <div style={{ padding: '20px' }}
+          className="flex flex-row sm:flex-col items-center justify-between sm:justify-center gap-4 sm:gap-6 bg-green-dark/5 rounded-3xl sm:w-64 sm:shrink-0">
+          <div className="text-center">
+            <p className="text-xs font-semibold text-green-dark/60 uppercase tracking-widest">{t('lobby.roomCode')}</p>
+            <p className="text-3xl sm:text-4xl font-bold text-green-dark tracking-[0.2em] font-mono">{roomCode}</p>
+          </div>
 
           {localPlayer && (
             <div className="text-center">
-              <p className="text-xs font-semibold text-green-dark/60 uppercase tracking-widest mb-2">{t('lobby.you')}</p>
-              <p className="text-xl font-bold text-green-dark">{localPlayer.name}</p>
-              <p className="text-sm text-green-dark/40 mt-1">{t('lobby.seat', { n: localPlayer.seatIndex + 1 })}</p>
+              <p className="text-xs font-semibold text-green-dark/60 uppercase tracking-widest mb-1">{t('lobby.you')}</p>
+              <p className="text-lg sm:text-xl font-bold text-green-dark">{localPlayer.name}</p>
+              <p className="text-sm text-green-dark/40 mt-0.5">{t('lobby.seat', { n: localPlayer.seatIndex + 1 })}</p>
             </div>
           )}
         </div>
 
-        {/* Right — Player list + waiting */}
+        {/* Bottom (mobile) / Right (desktop) — Player list + waiting */}
         <div className="flex-1 flex flex-col gap-4">
 
           <div className="flex items-center justify-between">
@@ -496,8 +500,9 @@ function ordinal(n: number): string {
 }
 
 function GameOver({ player }: { player: Player }) {
-  const { state } = useGameStore()
+  const { state, resetGame } = useGameStore()
   const { t } = useTranslation()
+  const navigate = useNavigate()
 
   if (!state?.results) {
     return (
@@ -596,6 +601,12 @@ function GameOver({ player }: { player: Player }) {
             </div>
           )
         })}
+        <button
+          onClick={() => { resetGame(); navigate('/') }}
+          className="text-sm text-green-dark/40 hover:text-green-dark transition-colors underline underline-offset-4"
+        >
+          {t('gameover.backToHome')}
+        </button>
       </div>
 
     </div>
