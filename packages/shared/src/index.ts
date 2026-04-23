@@ -1,5 +1,3 @@
-// ─── Enums ────────────────────────────────────────────────────────────────────
-
 export type Difficulty = 'easy' | 'medium' | 'hard';
 export type GameMode = 'multi' | 'single';
 
@@ -9,21 +7,19 @@ export type GamePhase =
   | 'decision'
   | 'game-over';
 
-// ─── Core Entities ────────────────────────────────────────────────────────────
-
 export interface Player {
-  id: string;          // socket id
-  token: string;       // persisted token for reconnection
+  id: string;
+  token: string;
   name: string;
   chips: number;
-  cards: number[];     // card values collected
-  seatIndex: number;   // order around the table
+  cards: number[];
+  seatIndex: number;
   connected: boolean;
 }
 
 export interface CardGroup {
-  cards: number[];  // consecutive run, sorted
-  score: number;    // = lowest card (only this card counts toward total)
+  cards: number[];
+  score: number;    // lowest card
 }
 
 export interface PlayerResult {
@@ -31,8 +27,8 @@ export interface PlayerResult {
   groups: CardGroup[];
   cardTotal: number;
   chips: number;
-  finalScore: number;  // cardTotal - chips
-  rank: number;        // 1-based; ties share the same rank
+  finalScore: number;
+  rank: number;
 }
 
 export interface GameState {
@@ -41,15 +37,13 @@ export interface GameState {
   mode: GameMode;
   phase: GamePhase;
   players: Player[];
-  deck: number[];            // remaining face-down cards (grid)
-  activeCard: number | null; // card currently being decided on
-  chipsOnCard: number;       // chips accumulated on the active card
+  deck: number[];
+  activeCard: number | null;
+  chipsOnCard: number;
   activePlayerIndex: number;
-  timerEndsAt: number | null; // Unix ms timestamp, null if no timer
+  timerEndsAt: number | null;
   results: PlayerResult[] | null;
 }
-
-// ─── Socket Events: Client → Server ───────────────────────────────────────────
 
 export interface ClientToServerEvents {
   'room:create': (payload: { difficulty: Difficulty; mode: GameMode }) => void;
@@ -63,8 +57,6 @@ export interface ClientToServerEvents {
   'game:take-card': () => void;
   'game:no-thanks': () => void;
 }
-
-// ─── Socket Events: Server → Client ───────────────────────────────────────────
 
 export interface ServerToClientEvents {
   'room:created': (payload: { roomCode: string }) => void;

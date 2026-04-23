@@ -13,12 +13,10 @@ interface GameStore {
   error: string | null
   roomClosed: boolean
 
-  // Lifecycle
   connect: () => void
   disconnect: () => void
   resetGame: () => void
 
-  // Host actions
   createRoom: (difficulty: Difficulty, mode: GameMode) => void
   reorderSeats: (orderedPlayerIds: string[]) => void
   startGame: () => void
@@ -26,14 +24,11 @@ interface GameStore {
   addPlayer: (name: string) => void
   removePlayer: (playerToken: string) => void
 
-  // Player actions
   joinRoom: (roomCode: string, name: string) => void
   selectCard: (card: number) => void
   takeCard: () => void
   noThanks: () => void
 }
-
-// ─── Session helpers ──────────────────────────────────────────────────────────
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ?? `http://${window.location.hostname}:3001`
 const SESSION_KEY = 'no-thankiew-session'
@@ -60,8 +55,6 @@ function clearSession() {
   localStorage.removeItem(SESSION_KEY)
 }
 
-// ─── Store ────────────────────────────────────────────────────────────────────
-
 export const useGameStore = create<GameStore>((set, get) => ({
   socket: null,
   state: null,
@@ -76,7 +69,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const socket: AppSocket = io(SOCKET_URL, { autoConnect: true })
 
-    // On every fresh connection, attempt to restore a previous session
     socket.on('connect', () => {
       const session = loadSession()
       if (session) {
@@ -98,7 +90,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     })
 
     socket.on('room:joined', ({ token, state }) => {
-      // Derive name from the player list to persist it for future reconnects
       const player = state.players.find(p => p.token === token)
       const name = player?.name ?? loadSession()?.name ?? ''
       saveSession({ token, roomCode: state.roomCode, name })
@@ -158,7 +149,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   joinRoom(roomCode, name) {
-    // Pass any previously saved token so the server can re-seat a returning player
     const token = loadSession()?.token ?? ''
     get().socket?.emit('room:join', { roomCode, name, token })
   },
@@ -175,8 +165,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     get().socket?.emit('game:no-thanks')
   },
 }))
-
-// ─── Convenience selector ─────────────────────────────────────────────────────
 
 export function useLocalPlayer() {
   return useGameStore((s) => {

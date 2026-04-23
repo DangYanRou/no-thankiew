@@ -17,8 +17,6 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
   },
 });
 
-// ─── Room Store ───────────────────────────────────────────────────────────────
-
 const MAX_ROOMS = 100;
 const ROOM_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
 
@@ -80,7 +78,6 @@ function startDecisionTimer(roomCode: string, room: RoomData) {
     const r = rooms.get(roomCode);
     if (!r || r.state.phase !== 'decision') return;
 
-    // Timer expired — auto-take the card
     r.state = takeCard(r.state);
     rooms.set(roomCode, r);
 
@@ -109,12 +106,9 @@ function startCardSelectTimer(roomCode: string, room: RoomData) {
   }, CARD_SELECT_TIMEOUT_MS);
 }
 
-// ─── Socket Events ────────────────────────────────────────────────────────────
-
 io.on('connection', (socket) => {
 
   socket.on('room:create', ({ difficulty, mode }: { difficulty: Difficulty; mode: GameMode }) => {
-    // Leave any previous rooms this socket was hosting
     for (const r of socket.rooms) {
       if (r !== socket.id) socket.leave(r);
     }
@@ -141,7 +135,6 @@ io.on('connection', (socket) => {
     const room = rooms.get(roomCode);
     if (!room) return socket.emit('room:error', 'Room not found.');
 
-    // Reconnection: token matches an existing player (lobby or active game)
     if (token) {
       const existing = room.state.players.find(p => p.token === token);
       if (existing) {
@@ -159,7 +152,6 @@ io.on('connection', (socket) => {
       }
     }
 
-    // New player: only allowed during lobby
     if (room.state.phase !== 'lobby') return socket.emit('room:error', 'Game already in progress.');
     if (room.state.players.length >= 7) return socket.emit('room:error', 'Room is full.');
 
@@ -283,7 +275,6 @@ io.on('connection', (socket) => {
     if (!canAct) return;
     if (activePlayer.chips === 0) return;
 
-    // Enforce 5s minimum spotlight before any action (skipped in easy mode)
     if (room.state.difficulty !== 'easy' && room.decisionStartedAt && Date.now() - room.decisionStartedAt < SPOTLIGHT_FREEZE_MS) return;
 
     clearTimers(room);
@@ -304,7 +295,6 @@ io.on('connection', (socket) => {
       : room.state.players[room.state.activePlayerIndex].id === socket.id;
     if (!canAct) return;
 
-    // Enforce 5s minimum spotlight before any action (skipped in easy mode)
     if (room.state.difficulty !== 'easy' && room.decisionStartedAt && Date.now() - room.decisionStartedAt < SPOTLIGHT_FREEZE_MS) return;
 
     clearTimers(room);
@@ -336,7 +326,13 @@ io.on('connection', (socket) => {
   });
 });
 
-// ─── Start ────────────────────────────────────────────────────────────────────
+app.get('/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    rooms: rooms.size,
+    uptimeSeconds: Math.floor(process.uptime()),
+  });
+});
 
 const PORT = process.env.PORT ?? 3001;
 httpServer.listen(PORT, () => {

@@ -1,7 +1,5 @@
 import type { GameState, Player, Difficulty, GameMode, CardGroup, PlayerResult } from 'shared';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
 const CHIPS_BY_COUNT: Record<number, number> = {
   3: 9, 4: 9, 5: 9, 6: 7, 7: 5,
 };
@@ -15,8 +13,6 @@ export const DECISION_TIMER_MS: Record<Difficulty, number | null> = {
 export const CARD_SELECT_TIMEOUT_MS = 10_000;
 export const SPOTLIGHT_FREEZE_MS = 5_000;
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -28,8 +24,6 @@ function shuffle<T>(arr: T[]): T[] {
   }
   return a;
 }
-
-// ─── State Factories ──────────────────────────────────────────────────────────
 
 export function createState(roomCode: string, difficulty: Difficulty, mode: GameMode): GameState {
   return {
@@ -65,14 +59,12 @@ function computeResults(players: Player[]): PlayerResult[] {
     return { player, groups, cardTotal, finalScore, minCard };
   });
 
-  // Sort: final score ASC, then lowest single card ASC (tie-breaker)
   withMeta.sort((a, b) =>
     a.finalScore !== b.finalScore
       ? a.finalScore - b.finalScore
       : a.minCard - b.minCard
   );
 
-  // Assign ranks — true tie only when both score AND min card are identical
   const results: PlayerResult[] = [];
   for (let i = 0; i < withMeta.length; i++) {
     const entry = withMeta[i];
@@ -94,7 +86,6 @@ function computeResults(players: Player[]): PlayerResult[] {
 }
 
 export function initGame(state: GameState): GameState {
-  // 33 cards (3–35), remove 9 at random, keep 24
   const fullDeck = Array.from({ length: 33 }, (_, i) => i + 3);
   const deck = shuffle(shuffle(fullDeck).slice(9));
 
@@ -114,8 +105,6 @@ export function initGame(state: GameState): GameState {
   };
 }
 
-// ─── Game Actions ─────────────────────────────────────────────────────────────
-
 export function revealCard(state: GameState, card: number): GameState {
   const timerMs = DECISION_TIMER_MS[state.difficulty];
   return {
@@ -129,7 +118,6 @@ export function revealCard(state: GameState, card: number): GameState {
 }
 
 export function passCard(state: GameState): GameState {
-  // update and deduct the chips of active player who pass the card
   const players = state.players.map((p, i) =>
     i === state.activePlayerIndex ? { ...p, chips: p.chips - 1 } : p
   );
@@ -164,8 +152,6 @@ export function takeCard(state: GameState): GameState {
     results,
   };
 }
-
-// ─── Scoring ──────────────────────────────────────────────────────────────────
 
 export function scorePlayer(player: Player): number {
   const sorted = [...player.cards].sort((a, b) => a - b);
